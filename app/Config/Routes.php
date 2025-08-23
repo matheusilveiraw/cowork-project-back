@@ -10,20 +10,23 @@ $routes->get('/', 'Home::index');
 
 $routes->setAutoRoute(true);
 
-$routes->get('customers', 'CustomersController::index'); // listar todos
-$routes->get('customers/(:num)', 'CustomersController::show/$1'); // buscar por ID
-$routes->post('customers', 'CustomersController::create'); // inserir
-$routes->put('customers/(:num)', 'CustomersController::update/$1'); // atualizar
-$routes->delete('customers/(:num)', 'CustomersController::delete/$1'); // deletar
+// CUSTOMERS ROUTES --------------------------------
 
+$routes->get('customers', 'CustomersController::getAllCustomers'); // listar todos
+// GET http://localhost/projetos/cowork-project-back/public/customers → lista todos
 
-// GET http://localhost/projetos/cowork-backend/public/customers → lista todos
+$routes->get('customers/(:num)', 'CustomersController::getCustomerById/$1'); // buscar por ID
+// GET http://localhost/projetos/cowork-project-back/public/customers/1 
 
-// GET http://localhost/projetos/cowork-backend/public/customers/1 → pega o ID 1
-
-// POST http://localhost/projetos/cowork-backend/public/customers
+$routes->post('customers', 'CustomersController::insertCustomer'); // inserir
+// POST http://localhost/projetos/cowork-project-back/public/customers
 // (body JSON exemplo: { "name": "Matheus", "email": "teste@test.com", "phone": "12345", "address": "Rua X" })
 
-// PUT http://localhost/projetos/cowork-backend/public/customers/1
+$routes->put('customers/(:num)', 'CustomersController::updateCustomer/$1'); // atualizar
+// PUT http://localhost/projetos/cowork-project-back/public/customers/1
+// (body JSON exemplo: { "name": "Matheus", "email": "teste@test.com", "phone": "12345", "address": "Rua X" })
 
-// DELETE http://localhost/projetos/cowork-backend/public/customers/1
+$routes->delete('customers/(:num)', 'CustomersController::deleteCustomer/$1'); // deletar
+// DELETE http://localhost/projetos/cowork-project-back/public/customers/1
+
+// CUSTOMERS ROUTES OFF  -------------------------------- 

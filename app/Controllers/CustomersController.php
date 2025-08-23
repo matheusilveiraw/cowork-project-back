@@ -4,54 +4,70 @@ namespace App\Controllers;
 
 use App\Models\CustomersModel;
 use CodeIgniter\RESTful\ResourceController;
+use ResponseTrait; 
 
-class CustomersController extends ResourceController
+
+class CustomersController extends BaseController
 {
-    protected $modelName = 'App\Models\CustomersModel';
-    protected $format = 'json';
+    protected $model;
+    
 
-    // GET /customers
-    public function index()
+    public function __construct()
     {
-        return $this->respond($this->model->findAll());
+        $this->model = new \App\Models\CustomersModel();
     }
 
-    // GET /customers/{id}
-    public function show($id = null)
+    public function getAllCustomers()
     {
-        $data = $this->model->find($id);
-        if ($data) {
-            return $this->respond($data);
-        }
-        return $this->failNotFound("Customer not found");
+        return $this->response->setJSON($this->model->findAll());
+        //padrão code igniter para buscar tudo no banco
     }
 
-    // POST /customers
-    public function create()
+    public function insertCustomer()
     {
-        $data = $this->request->getJSON(true); // pega JSON do body
-        if ($this->model->insert($data)) {
-            return $this->respondCreated($data);
+        $data = $this->request->getJSON(true);
+
+        if (!$data) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'JSON inválido']);
         }
-        return $this->fail("Failed to create customer");
+
+        if ($this->model->insert($data)) { //padrão code igniter para o insert
+            return $this->response
+                ->setStatusCode(201)
+                ->setJSON($data);
+        }
+
+        return $this->response
+            ->setStatusCode(400)
+            ->setJSON(['error' => 'Falha ao inserir cliente']);
     }
 
     // PUT /customers/{id}
-    public function update($id = null)
+    public function updateCustomer($id = null)
     {
         $data = $this->request->getJSON(true);
-        if ($this->model->update($id, $data)) {
-            return $this->respond($data);
+
+        if ($this->model->update($id, $data)) { //padrão code igniter para o update 
+            return $this->response->setJSON($data);
         }
-        return $this->fail("Failed to update customer");
+
+        return $this->response->setStatusCode(400)->setJSON(['error' => 'Falha ao atualizar o cliente']);
     }
 
     // DELETE /customers/{id}
-    public function delete($id = null)
+    public function deleteCustomer($id = null)
     {
         if ($this->model->delete($id)) {
-            return $this->respondDeleted(["id" => $id, "message" => "Deleted"]);
+            return $this->response->setJSON([
+                "id" => $id,
+                "message" => "Cliente deletado!"
+            ])->setStatusCode(200);
         }
-        return $this->failNotFound("Customer not found");
+
+        return $this->response->setJSON([
+            "error" => "Cliente não encontrado"
+        ])->setStatusCode(404);
     }
 }
