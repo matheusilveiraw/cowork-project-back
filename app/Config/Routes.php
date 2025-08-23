@@ -30,3 +30,8 @@ $routes->delete('customers/(:num)', 'CustomersController::deleteCustomer/$1'); /
 // DELETE http://localhost/projetos/cowork-project-back/public/customers/1
 
 // CUSTOMERS ROUTES OFF  -------------------------------- 
+
+// DESKS ROUTE ON -----------------------------------
+
+$routes->get('desks', 'DesksController::getAllDesks');
+// GET http://localhost/projetos/cowork-project-back/public/desks
