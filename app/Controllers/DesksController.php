@@ -56,4 +56,15 @@ class DesksController extends BaseController
             ->setJSON(['error' => 'Falha ao inserir a mesa']);
     }
 
+        public function updateDesk($id = null)  {
+        $data = $this->request->getJSON(true);
+
+        if ($this->model->update($id, $data)) {
+            return $this->response->setJSON($data);
+        }
+
+        return $this->response->setStatusCode(400)->setJSON(['error' => 'Falha ao atualizar a mesa']);
+    }
+
+
 }

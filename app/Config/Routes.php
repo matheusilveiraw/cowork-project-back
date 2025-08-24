@@ -42,3 +42,8 @@ $routes->get('desks/(:num)', 'DesksController::getDesksById/$1');
 $routes->post('desks', 'DesksController::insertDesk');
 // POST http://localhost/projetos/cowork-project-back/public/desks
 // (body JSON exemplo: { "deskNumber": "8", "deskName": "apotoat" })
+
+$routes->put('desks/(:num)', 'DesksController::updateDesk/$1'); // atualizar
+// PUT http://localhost/projetos/cowork-project-back/public/desk/1
+// { "deskNumber": "8", "deskName": "apotoat" })
+
