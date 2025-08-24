@@ -4,13 +4,13 @@ namespace App\Controllers;
 
 use App\Models\CustomersModel;
 use CodeIgniter\RESTful\ResourceController;
-use ResponseTrait; 
+use ResponseTrait;
 
 
 class CustomersController extends BaseController
 {
     protected $model;
-    
+
 
     public function __construct()
     {
@@ -21,6 +21,19 @@ class CustomersController extends BaseController
     {
         return $this->response->setJSON($this->model->findAll());
         //padrão code igniter para buscar tudo no banco
+    }
+
+    public function getCustomerById($id){
+        $customer = $this->model->find($id);
+
+        if ($customer) {
+            return $this->response->setJSON($customer);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Customer not found'
+            ])->setStatusCode(404);
+        }
     }
 
     public function insertCustomer()
