@@ -35,3 +35,6 @@ $routes->delete('customers/(:num)', 'CustomersController::deleteCustomer/$1'); /
 
 $routes->get('desks', 'DesksController::getAllDesks');
 // GET http://localhost/projetos/cowork-project-back/public/desks
+
+$routes->get('desks/(:num)', 'DesksController::getDesksById/$1');
+// GET http://localhost/projetos/cowork-project-back/public/desks/1 

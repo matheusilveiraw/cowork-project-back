@@ -10,7 +10,7 @@ use ResponseTrait;
 class DesksController extends BaseController
 {
     protected $modelName = DesksModel::class;
-    protected $format    = 'json';
+    protected $format = 'json';
 
 
     public function __construct()
@@ -21,6 +21,19 @@ class DesksController extends BaseController
     public function getAllDesks()
     {
         return $this->response->setJSON($this->model->findAll());
+    }
+
+    public function getDesksById($id){
+        $desk = $this->model->find($id);
+
+        if ($desk) {
+            return $this->response->setJSON($desk);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Mesa não encontrada'
+            ])->setStatusCode(404);
+        }
     }
 
 }
