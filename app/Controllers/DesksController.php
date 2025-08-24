@@ -56,7 +56,7 @@ class DesksController extends BaseController
             ->setJSON(['error' => 'Falha ao inserir a mesa']);
     }
 
-        public function updateDesk($id = null)  {
+    public function updateDesk($id = null)  {
         $data = $this->request->getJSON(true);
 
         if ($this->model->update($id, $data)) {
@@ -66,5 +66,16 @@ class DesksController extends BaseController
         return $this->response->setStatusCode(400)->setJSON(['error' => 'Falha ao atualizar a mesa']);
     }
 
+    public function deleteDesk($id = null)    {
+        if ($this->model->delete($id)) {
+            return $this->response->setJSON([
+                "id" => $id,
+                "message" => "Mesa deletada!"
+            ])->setStatusCode(200);
+        }
 
+        return $this->response->setJSON([
+            "error" => "Mesa não encontrado"
+        ])->setStatusCode(404);
+    }
 }
