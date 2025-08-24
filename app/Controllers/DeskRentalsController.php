@@ -20,7 +20,7 @@ class DeskRentalsController extends BaseController
         return $this->response->setJSON($this->model->findAll());
     }
 
-    public function insertDeskRentals(){
+    public function insertDeskRental(){
         $data = $this->request->getJSON(true);
 
         if (!$data) {

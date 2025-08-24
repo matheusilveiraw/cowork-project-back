@@ -56,3 +56,11 @@ $routes->delete('desks/(:num)', 'DesksController::deleteDesk/$1');
 
 $routes->get('deskrentals', 'DeskRentalsController::getAllDeskRentals');
 // GET http://localhost/projetos/cowork-project-back/public/deskrentals
+
+
+//terão três tipos de insert nesse caso, ver como faço isso certinho - TO DO
+//insert diario, semanal e mensal, acredito que tenha a opção de meio periodo ainda para cada uma dessas 
+
+$routes->post('deskrentals', 'DeskRentalsController::insertDeskRental');
+// POST http://localhost/projetos/cowork-project-back/public/deskrentals
+// { "idDesk": "1", "idCustomer": "1", "startPeriod": "2025-08-22 8:00:00", "endPeriod": "2025-08-22 18:00:00" } 

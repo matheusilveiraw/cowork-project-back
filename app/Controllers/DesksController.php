@@ -12,7 +12,6 @@ class DesksController extends BaseController
     protected $modelName = DesksModel::class;
     protected $format = 'json';
 
-
     public function __construct()
     {
         $this->model = new \App\Models\DesksModel();
