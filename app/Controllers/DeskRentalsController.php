@@ -19,4 +19,24 @@ class DeskRentalsController extends BaseController
     {
         return $this->response->setJSON($this->model->findAll());
     }
+
+    public function insertDeskRentals(){
+        $data = $this->request->getJSON(true);
+
+        if (!$data) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'JSON inválido']);
+        }
+
+        if ($this->model->insert($data)) { 
+            return $this->response
+                ->setStatusCode(201)
+                ->setJSON($data);
+        }
+
+        return $this->response
+            ->setStatusCode(400)
+            ->setJSON(['error' => 'Falha ao inserir aluguel da mesa']);
+    }
 }

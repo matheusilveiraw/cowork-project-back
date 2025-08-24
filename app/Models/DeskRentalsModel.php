@@ -8,11 +8,11 @@ class DeskRentalsModel extends Model
 {
     protected $table = 'deskRentals';
     protected $primaryKey = 'idDeskRental';
-    protected $allowedFields = ['idDesk', 'idCustomer', 'period_start', 'period_end'];
+    protected $allowedFields = ['idDesk', 'idCustomer', 'startPeriod', 'endPeriod'];
 
     // idDeskRental INT AUTO_INCREMENT PRIMARY KEY,
     // idDesk INT NOT NULL,
     // idCustomer INT NOT NULL,
-    // period_start DATETIME NOT NULL,
-    // period_end DATETIME NOT NULL,
+    // startPeriod DATETIME NOT NULL,
+    // endPeriod DATETIME NOT NULL,
 }
