@@ -49,3 +49,10 @@ $routes->put('desks/(:num)', 'DesksController::updateDesk/$1');
 
 $routes->delete('desks/(:num)', 'DesksController::deleteDesk/$1');
 // DELETE http://localhost/projetos/cowork-project-back/public/desks/1
+
+// DESKS ROUTE OFF -----------------------------------
+
+// DESKS RENTALS ON -----------------------------------
+
+$routes->get('deskrentals', 'DeskRentalsController::getAllDeskRentals');
+// GET http://localhost/projetos/cowork-project-back/public/deskrentals
