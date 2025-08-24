@@ -31,7 +31,7 @@ class CustomersController extends BaseController
         } else {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Customer not found'
+                'message' => 'Cliente não encontrado'
             ])->setStatusCode(404);
         }
     }
