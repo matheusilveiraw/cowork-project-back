@@ -38,3 +38,7 @@ $routes->get('desks', 'DesksController::getAllDesks');
 
 $routes->get('desks/(:num)', 'DesksController::getDesksById/$1');
 // GET http://localhost/projetos/cowork-project-back/public/desks/1 
+
+$routes->post('desks', 'DesksController::insertDesk');
+// POST http://localhost/projetos/cowork-project-back/public/desks
+// (body JSON exemplo: { "deskNumber": "8", "deskName": "apotoat" })

@@ -36,4 +36,24 @@ class DesksController extends BaseController
         }
     }
 
+    public function insertDesk(){
+        $data = $this->request->getJSON(true);
+
+        if (!$data) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'JSON inválido']);
+        }
+
+        if ($this->model->insert($data)) { 
+            return $this->response
+                ->setStatusCode(201)
+                ->setJSON($data);
+        }
+
+        return $this->response
+            ->setStatusCode(400)
+            ->setJSON(['error' => 'Falha ao inserir a mesa']);
+    }
+
 }
