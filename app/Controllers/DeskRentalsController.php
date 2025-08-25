@@ -39,4 +39,16 @@ class DeskRentalsController extends BaseController
             ->setStatusCode(400)
             ->setJSON(['error' => 'Falha ao inserir aluguel da mesa']);
     }
+        public function getDeskRentalById($id){
+        $deskRental = $this->model->find($id);
+
+        if ($deskRental) {
+            return $this->response->setJSON($deskRental);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Mesa não encontrada'
+            ])->setStatusCode(404);
+        }
+    }
 }
