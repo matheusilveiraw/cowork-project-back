@@ -64,4 +64,17 @@ class DeskRentalsController extends BaseController
 
         return $this->response->setStatusCode(400)->setJSON(['error' => 'Falha ao atualizar aluguel da mesa']);
     }
+
+    public function deleteDeskRental($id = null)    {
+        if ($this->model->delete($id)) {
+            return $this->response->setJSON([
+                "id" => $id,
+                "message" => "Alguel da mesa deletado!"
+            ])->setStatusCode(200);
+        }
+
+        return $this->response->setJSON([
+            "error" => "Aluguel da mesa não encontrado"
+        ])->setStatusCode(404);
+    }
 }
