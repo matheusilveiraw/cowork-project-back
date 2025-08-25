@@ -59,6 +59,11 @@ $routes->get('deskrentals', 'DeskRentalsController::getAllDeskRentals');
 
 //terão três tipos de insert nesse caso, ver como faço isso certinho - TO DO
 //insert diario, semanal e mensal, acredito que tenha a opção de meio periodo ainda para cada uma dessas 
+//TEM QUE VER TAMBÉM A QUESTÃO DO PERIODO, tinha as opções matutino dia, semana e mês, vespertino dia, semana e mês, periodo completo dia, semana e mês
+//alterar com um campo de periodo: m morning, a after noon e L all day long 
+//a partir disso acho que consigo fazer um jeito do sistema entender o restante
+//é importante comparar a data, a reserva e o número da mesa ao fazer a requisição e o periodo
+
 
 $routes->post('deskrentals', 'DeskRentalsController::insertDeskRental');
 // POST http://localhost/projetos/cowork-project-back/public/deskrentals
