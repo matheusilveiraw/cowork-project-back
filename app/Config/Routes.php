@@ -66,3 +66,6 @@ $routes->post('deskrentals', 'DeskRentalsController::insertDeskRental');
 
 $routes->get('deskrentals/(:num)', 'DeskRentalsController::getDeskRentalById/$1');
 // GET http://localhost/projetos/cowork-project-back/public/deskrental/1 
+
+$routes->put('deskrentals/(:num)', 'DeskRentalsController::updateDeskRental/$1'); 
+// PUT { "idDesk": "2", "idCustomer": "1", "startPeriod": "2025-08-22 8:00:00", "endPeriod": "2025-08-22 18:00:00" } 

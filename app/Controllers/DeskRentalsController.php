@@ -20,7 +20,8 @@ class DeskRentalsController extends BaseController
         return $this->response->setJSON($this->model->findAll());
     }
 
-    public function insertDeskRental(){
+    public function insertDeskRental()
+    {
         $data = $this->request->getJSON(true);
 
         if (!$data) {
@@ -29,7 +30,7 @@ class DeskRentalsController extends BaseController
                 ->setJSON(['error' => 'JSON inválido']);
         }
 
-        if ($this->model->insert($data)) { 
+        if ($this->model->insert($data)) {
             return $this->response
                 ->setStatusCode(201)
                 ->setJSON($data);
@@ -39,7 +40,8 @@ class DeskRentalsController extends BaseController
             ->setStatusCode(400)
             ->setJSON(['error' => 'Falha ao inserir aluguel da mesa']);
     }
-        public function getDeskRentalById($id){
+    public function getDeskRentalById($id)
+    {
         $deskRental = $this->model->find($id);
 
         if ($deskRental) {
@@ -47,8 +49,19 @@ class DeskRentalsController extends BaseController
         } else {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Mesa não encontrada'
+                'message' => 'Aluguel da mesa não encontrado'
             ])->setStatusCode(404);
         }
+    }
+
+    public function updateDeskRental($id = null)
+    {
+        $data = $this->request->getJSON(true);
+
+        if ($this->model->update($id, $data)) {
+            return $this->response->setJSON($data);
+        }
+
+        return $this->response->setStatusCode(400)->setJSON(['error' => 'Falha ao atualizar aluguel da mesa']);
     }
 }
