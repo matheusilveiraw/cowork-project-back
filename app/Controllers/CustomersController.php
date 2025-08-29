@@ -11,7 +11,6 @@ class CustomersController extends BaseController
 {
     protected $model;
 
-
     public function __construct()
     {
         $this->model = new \App\Models\CustomersModel();

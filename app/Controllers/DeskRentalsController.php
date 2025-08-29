@@ -24,6 +24,10 @@ class DeskRentalsController extends BaseController
     {
         $data = $this->request->getJSON(true);
 
+        //precisa validar se a data de inicio é maior que a data de fim
+        //preciso decidir se o sistema identifica o plano ou se deixo pro usuario escolher o plano
+        //provavelmente mais fácil deixar na mão do sistema
+
         if (!$data) {
             return $this->response
                 ->setStatusCode(400)
@@ -40,6 +44,7 @@ class DeskRentalsController extends BaseController
             ->setStatusCode(400)
             ->setJSON(['error' => 'Falha ao inserir aluguel da mesa']);
     }
+
     public function getDeskRentalById($id)
     {
         $deskRental = $this->model->find($id);

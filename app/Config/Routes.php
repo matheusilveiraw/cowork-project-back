@@ -63,6 +63,7 @@ $routes->get('deskrentals', 'DeskRentalsController::getAllDeskRentals');
 //alterar com um campo de periodo: m morning, a after noon e L all day long 
 //a partir disso acho que consigo fazer um jeito do sistema entender o restante
 //é importante comparar a data, a reserva e o número da mesa ao fazer a requisição e o periodo
+//posso fazer um insert para todos e tratar no front como agendado entre as 8h e as 18h.
 
 
 $routes->post('deskrentals', 'DeskRentalsController::insertDeskRental');
