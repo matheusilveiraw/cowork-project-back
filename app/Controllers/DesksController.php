@@ -4,13 +4,15 @@ namespace App\Controllers;
 
 use App\Models\DesksModel;
 use CodeIgniter\RESTful\ResourceController;
-use ResponseTrait;
+use CodeIgniter\API\ResponseTrait; 
+
 
 
 class DesksController extends BaseController
 {
     protected $modelName = DesksModel::class;
     protected $format = 'json';
+    use ResponseTrait; 
 
     public function __construct()
     {
@@ -35,24 +37,61 @@ class DesksController extends BaseController
         }
     }
 
-    public function insertDesk(){
-        $data = $this->request->getJSON(true);
+    public function insertDesk()
+    {
+        try {
+            $json = $this->request->getJSON();
+            $deskModel = new \App\Models\DesksModel();
+            $dto = [
+                'deskNumber' => $json->deskNumber,
+                'deskName' => $json->deskName
+            ];
 
-        if (!$data) {
+            // Validações-----------------
+
+            if (!$json) {
+                return $this->response
+                    ->setStatusCode(400)
+                    ->setJSON(['error' => 'JSON inválido']);
+            }
+
+            if (!isset($json->deskNumber) || empty($json->deskNumber)) {
+                return $this->fail('Número da mesa é obrigatório', 400);
+            }
+
+            $existingDesk = $deskModel->where('deskNumber', value: $json->deskNumber)->first();
+            
+            if ($existingDesk) {
+                return $this->fail('Já existe uma mesa com este número', 409);
+            }
+
+            //validações off -------------
+
+            if ($deskModel->insert($dto)) {
+                $newId = $deskModel->getInsertID();
+                
+                return $this->response
+                    ->setStatusCode(201)
+                    ->setJSON([
+                        'status' => 'success',
+                        'message' => 'Mesa criada com sucesso!',
+                        'data' => [
+                            'id' => $newId,
+                            'deskNumber' => $json->deskNumber,
+                            'deskName' => $json->deskName
+                        ]
+                    ]);
+            }
+
             return $this->response
                 ->setStatusCode(400)
-                ->setJSON(['error' => 'JSON inválido']);
-        }
+                ->setJSON(['error' => 'Falha ao inserir a mesa']);
 
-        if ($this->model->insert($data)) { 
+        } catch (\Exception $e) {
             return $this->response
-                ->setStatusCode(201)
-                ->setJSON($data);
+                ->setStatusCode(500)
+                ->setJSON(['error' => 'Erro interno: ' . $e->getMessage()]);
         }
-
-        return $this->response
-            ->setStatusCode(400)
-            ->setJSON(['error' => 'Falha ao inserir a mesa']);
     }
 
     public function updateDesk($id = null)  {
