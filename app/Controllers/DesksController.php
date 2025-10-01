@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Models\DesksModel;
 use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait; 
+use CodeIgniter\API\ResponseTrait;
 
 
 
@@ -12,7 +12,7 @@ class DesksController extends BaseController
 {
     protected $modelName = DesksModel::class;
     protected $format = 'json';
-    use ResponseTrait; 
+    use ResponseTrait;
 
     public function __construct()
     {
@@ -21,10 +21,12 @@ class DesksController extends BaseController
 
     public function getAllDesks()
     {
-        return $this->response->setJSON($this->model->findAll());
+        $mesas = $this->model->orderBy('deskNumber', 'ASC')->findAll();
+        return $this->response->setJSON($mesas);
     }
 
-    public function getDesksById($id){
+    public function getDesksById($id)
+    {
         $desk = $this->model->find($id);
 
         if ($desk) {
@@ -60,7 +62,7 @@ class DesksController extends BaseController
             }
 
             $existingDesk = $deskModel->where('deskNumber', value: $json->deskNumber)->first();
-            
+
             if ($existingDesk) {
                 return $this->fail('Já existe uma mesa com este número', 409);
             }
@@ -69,7 +71,7 @@ class DesksController extends BaseController
 
             if ($deskModel->insert($dto)) {
                 $newId = $deskModel->getInsertID();
-                
+
                 return $this->response
                     ->setStatusCode(201)
                     ->setJSON([
@@ -94,7 +96,8 @@ class DesksController extends BaseController
         }
     }
 
-    public function updateDesk($id = null)  {
+    public function updateDesk($id = null)
+    {
         $data = $this->request->getJSON(true);
 
         if ($this->model->update($id, $data)) {
@@ -104,7 +107,8 @@ class DesksController extends BaseController
         return $this->response->setStatusCode(400)->setJSON(['error' => 'Falha ao atualizar a mesa']);
     }
 
-    public function deleteDesk($id = null)    {
+    public function deleteDesk($id = null)
+    {
         if ($this->model->delete($id)) {
             return $this->response->setJSON([
                 "id" => $id,
