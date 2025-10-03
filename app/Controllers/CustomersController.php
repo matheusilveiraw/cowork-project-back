@@ -22,7 +22,8 @@ class CustomersController extends BaseController
         //padrão code igniter para buscar tudo no banco
     }
 
-    public function getCustomerById($id){
+    public function getCustomerById($id)
+    {
         $customer = $this->model->find($id);
 
         if ($customer) {
@@ -71,15 +72,30 @@ class CustomersController extends BaseController
     // DELETE /customers/{id}
     public function deleteCustomer($id = null)
     {
-        if ($this->model->delete($id)) {
-            return $this->response->setJSON([
-                "id" => $id,
-                "message" => "Cliente deletado!"
-            ])->setStatusCode(200);
-        }
+        try {
+            if ($this->model->delete($id)) {
+                return $this->response->setJSON([
+                    "id" => $id,
+                    "message" => "Cliente deletado com sucesso!"
+                ])->setStatusCode(200);
+            }
 
-        return $this->response->setJSON([
-            "error" => "Cliente não encontrado"
-        ])->setStatusCode(404);
+            return $this->response->setJSON([
+                "error" => "Cliente não encontrado"
+            ])->setStatusCode(404);
+
+        } catch (\Exception $e) {
+            // Verifica se é erro de chave estrangeira
+            if (strpos($e->getMessage(), 'foreign key constraint fails') !== false) {
+                return $this->response->setJSON([
+                    "error" => "Não é possível excluir este cliente pois ele está vinculado a um ou mais aluguéis de mesas. Para excluir, primeiro remova todos os aluguéis associados a este cliente."
+                ])->setStatusCode(409);
+            }
+
+            // Outros erros
+            return $this->response->setJSON([
+                "error" => "Erro interno ao tentar excluir cliente: " . $e->getMessage()
+            ])->setStatusCode(500);
+        }
     }
 }
