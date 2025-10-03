@@ -62,16 +62,73 @@ class CustomersController extends BaseController
     }
 
     // PUT /customers/{id}
-    public function updateCustomer($id = null)
-    {
-        $data = $this->request->getJSON(true);
+        public function updateCustomer($id = null)
+        {
+            $data = $this->request->getJSON(true);
 
-        if ($this->model->update($id, $data)) { //padrão code igniter para o update 
-            return $this->response->setJSON($data);
+            if (!$data) {
+                return $this->response
+                    ->setStatusCode(400)
+                    ->setJSON(['error' => 'JSON inválido']);
+            }
+
+            log_message('debug', 'Dados recebidos para update: ' . print_r($data, true));
+            log_message('debug', 'ID do cliente: ' . $id);
+
+            try {
+                $clienteExistente = $this->model->find($id);
+                if (!$clienteExistente) {
+                    return $this->response
+                        ->setStatusCode(404)
+                        ->setJSON(['error' => 'Cliente não encontrado']);
+                }
+
+                unset($data['idCustomer']);
+                unset($data['created_at']);
+
+                $regrasValidacao = [
+                    'nameCustomer' => 'required|min_length[2]|max_length[100]',
+                    'emailCustomer' => "required|valid_email|max_length[100]|is_unique[customers.emailCustomer,idCustomer,{$id}]",
+                    'phoneCustomer' => 'permit_empty|max_length[20]',
+                    'addressCustomer' => 'permit_empty|max_length[255]'
+                ];
+
+                if (!$this->validate($regrasValidacao)) {
+                    return $this->response
+                        ->setStatusCode(400)
+                        ->setJSON([
+                            'error' => 'Dados inválidos',
+                            'errors' => $this->validator->getErrors()
+                        ]);
+                }
+
+                if ($this->model->update($id, $data)) {
+                    return $this->response
+                        ->setStatusCode(200)
+                        ->setJSON([
+                            'message' => 'Cliente atualizado com sucesso!',
+                            'data' => $data
+                        ]);
+                }
+
+                return $this->response
+                    ->setStatusCode(400)
+                    ->setJSON(['error' => 'Falha ao atualizar cliente']);
+
+            } catch (\Exception $e) {
+                log_message('error', 'Erro ao atualizar cliente: ' . $e->getMessage());
+                
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                    return $this->response
+                        ->setStatusCode(409)
+                        ->setJSON(['error' => 'Já existe um cliente com este email']);
+                }
+
+                return $this->response
+                    ->setStatusCode(500)
+                    ->setJSON(['error' => 'Erro interno: ' . $e->getMessage()]);
+            }
         }
-
-        return $this->response->setStatusCode(400)->setJSON(['error' => 'Falha ao atualizar o cliente']);
-    }
 
     // DELETE /customers/{id}
     public function deleteCustomer($id = null)
