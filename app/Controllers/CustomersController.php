@@ -46,10 +46,14 @@ class CustomersController extends BaseController
                 ->setJSON(['error' => 'JSON inválido']);
         }
 
-        if ($this->model->insert($data)) { //padrão code igniter para o insert
+        if ($this->model->insert($data)) {
+            $id = $this->model->getInsertID();
             return $this->response
                 ->setStatusCode(201)
-                ->setJSON($data);
+                ->setJSON([
+                    'id' => $id,
+                    'message' => 'Cliente cadastrado com sucesso!'
+                ]);
         }
 
         return $this->response
