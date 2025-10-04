@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Controllers;
 
-use CodeIgniter\Model;
+use App\Models\RentalPlansModel;
+use CodeIgniter\RESTful\ResourceController;
 
 class RentalPlansController extends ResourceController
 {
@@ -13,7 +14,9 @@ class RentalPlansController extends ResourceController
         $this->model = new RentalPlansModel();
     }
     
-    public function index() { /* dps implementar o crud */ }
+    public function index()
+    {
+        $planos = $this->model->findAll();
+        return $this->response->setJSON($planos);
+    }
 }
-
-?>
