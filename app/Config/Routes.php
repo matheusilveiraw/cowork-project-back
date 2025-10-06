@@ -80,3 +80,7 @@ $routes->put('deskrentals/(:num)', 'DeskRentalsController::updateDeskRental/$1')
 $routes->delete('deskrentals/(:num)', 'DeskRentalsController::deleteDeskRental/$1'); 
 // DELETE http://localhost/projetos/cowork-project-back/public/deskrental/1  
 // { "idDesk": "2", "idCustomer": "1", "startPeriod": "2025-08-22 8:00:00", "endPeriod": "2025-08-22 18:00:00" } 
+
+// RENTAL PLANS ROUTES -----------------------------------
+$routes->get('rental-plans', 'RentalPlansController::index');
+// GET http://localhost/projetos/cowork-project-back/public/rental-plans
