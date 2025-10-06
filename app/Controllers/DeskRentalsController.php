@@ -73,6 +73,15 @@ class DeskRentalsController extends BaseController
                 ->setJSON(['error' => 'Categoria do plano não encontrada']);
         }
 
+        $shiftModel = new \App\Models\RentalShiftsModel();
+        $shift = $shiftModel->find($plan['idShift']);
+
+        if (!$shift) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'Turno do plano não encontrado']);
+        }
+
         $startPeriod = \DateTime::createFromFormat('Y-m-d H:i:s', $data['startPeriod']);
         if (!$startPeriod) {
             return $this->response
@@ -87,6 +96,11 @@ class DeskRentalsController extends BaseController
                 ->setJSON(['error' => 'Data de início não pode ser no passado']);
         }
 
+        $startTime = $this->getStartTimeForShift($shift['shiftName']);
+        $endTime = $this->getEndTimeForShift($shift['shiftName']);
+
+        $startPeriod->setTime($startTime['hour'], $startTime['minute'], 0);
+        
         $endPeriod = clone $startPeriod;
 
         switch ($category['categoryName']) {
@@ -105,27 +119,12 @@ class DeskRentalsController extends BaseController
                     ->setJSON(['error' => 'Categoria de plano inválida']);
         }
 
-        $shiftModel = new \App\Models\RentalShiftsModel();
-        $shift = $shiftModel->find($plan['idShift']);
+        $endPeriod->setTime($endTime['hour'], $endTime['minute'], 0);
 
-        if ($shift) {
-            switch ($shift['shiftName']) {
-                case 'Manhã':
-                    $endPeriod->setTime(12, 0, 0);
-                    break;
-                case 'Tarde':
-                    $endPeriod->setTime(18, 0, 0);
-                    break;
-                case 'Integral':
-                    $endPeriod->setTime(18, 0, 0);
-                    break;
-            }
-        }
-
-        if (!$this->isDeskAvailable($data['idDesk'], $startPeriod->format('Y-m-d H:i:s'), $endPeriod->format('Y-m-d H:i:s'))) {
+        if (!$this->isDeskAvailableForShift($data['idDesk'], $startPeriod->format('Y-m-d H:i:s'), $endPeriod->format('Y-m-d H:i:s'), $shift['shiftName'])) {
             return $this->response
                 ->setStatusCode(409)
-                ->setJSON(['error' => 'Mesa já está alugada neste período']);
+                ->setJSON(['error' => 'Mesa já está alugada neste período/turno']);
         }
 
         $dadosInserir = [
@@ -155,19 +154,72 @@ class DeskRentalsController extends BaseController
             ->setJSON(['error' => 'Falha ao inserir aluguel da mesa']);
     }
 
-    private function isDeskAvailable($deskId, $startPeriod, $endPeriod)
+    private function getStartTimeForShift($shiftName)
     {
-        $conflictingRentals = $this->model
+        switch ($shiftName) {
+            case 'Manhã':
+            case 'Integral':
+                return ['hour' => 8, 'minute' => 0]; 
+            case 'Tarde':
+                return ['hour' => 13, 'minute' => 0];
+            default:
+                return ['hour' => 8, 'minute' => 0];
+        }
+    }
+
+    private function getEndTimeForShift($shiftName)
+    {
+        switch ($shiftName) {
+            case 'Manhã':
+                return ['hour' => 12, 'minute' => 0]; 
+            case 'Tarde':
+                return ['hour' => 18, 'minute' => 0]; 
+            case 'Integral':
+                return ['hour' => 18, 'minute' => 0]; 
+            default:
+                return ['hour' => 18, 'minute' => 0];
+        }
+    }
+
+    private function isDeskAvailableForShift($deskId, $startPeriod, $endPeriod, $shiftName)
+    {
+        $existingRentals = $this->model
             ->where('idDesk', $deskId)
-            ->where("(
-                (startPeriod <= '{$startPeriod}' AND endPeriod >= '{$startPeriod}') OR
-                (startPeriod <= '{$endPeriod}' AND endPeriod >= '{$endPeriod}') OR
-                (startPeriod >= '{$startPeriod}' AND endPeriod <= '{$endPeriod}') OR
-                (startPeriod <= '{$startPeriod}' AND endPeriod >= '{$endPeriod}')
-            )")
             ->findAll();
 
-        return empty($conflictingRentals);
+        if (empty($existingRentals)) {
+            return true;
+        }
+
+        $newStart = new \DateTime($startPeriod);
+        $newEnd = new \DateTime($endPeriod);
+
+        foreach ($existingRentals as $rental) {
+            $existingStart = new \DateTime($rental['startPeriod']);
+            $existingEnd = new \DateTime($rental['endPeriod']);
+
+            $existingPlan = (new \App\Models\RentalPlansModel())->find($rental['idPlan']);
+            $existingShift = (new \App\Models\RentalShiftsModel())->find($existingPlan['idShift']);
+
+            if ($newStart < $existingEnd && $newEnd > $existingStart) {
+                if (!$this->areShiftsCompatible($shiftName, $existingShift['shiftName'])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private function areShiftsCompatible($newShift, $existingShift)
+    {
+        $compatibleShifts = [
+            'Manhã' => ['Tarde'], 
+            'Tarde' => ['Manhã'], 
+            'Integral' => [] 
+        ];
+
+        return in_array($existingShift, $compatibleShifts[$newShift] ?? []);
     }
 
     public function getDeskRentalById($id)
