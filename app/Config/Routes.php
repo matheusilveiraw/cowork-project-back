@@ -57,15 +57,6 @@ $routes->delete('desks/(:num)', 'DesksController::deleteDesk/$1');
 $routes->get('deskrentals', 'DeskRentalsController::getAllDeskRentals');
 // GET http://localhost/projetos/cowork-project-back/public/deskrentals
 
-//terão três tipos de insert nesse caso, ver como faço isso certinho - TO DO
-//insert diario, semanal e mensal, acredito que tenha a opção de meio periodo ainda para cada uma dessas 
-//TEM QUE VER TAMBÉM A QUESTÃO DO PERIODO, tinha as opções matutino dia, semana e mês, vespertino dia, semana e mês, periodo completo dia, semana e mês
-//alterar com um campo de periodo: m morning, a after noon e L all day long 
-//a partir disso acho que consigo fazer um jeito do sistema entender o restante
-//é importante comparar a data, a reserva e o número da mesa ao fazer a requisição e o periodo
-//posso fazer um insert para todos e tratar no front como agendado entre as 8h e as 18h.
-
-
 $routes->post('deskrentals', 'DeskRentalsController::insertDeskRental');
 // POST http://localhost/projetos/cowork-project-back/public/deskrentals
 // { "idDesk": "1", "idCustomer": "1", "startPeriod": "2025-08-22 8:00:00", "endPeriod": "2025-08-22 18:00:00" } 
@@ -80,6 +71,8 @@ $routes->put('deskrentals/(:num)', 'DeskRentalsController::updateDeskRental/$1')
 $routes->delete('deskrentals/(:num)', 'DeskRentalsController::deleteDeskRental/$1'); 
 // DELETE http://localhost/projetos/cowork-project-back/public/deskrental/1  
 // { "idDesk": "2", "idCustomer": "1", "startPeriod": "2025-08-22 8:00:00", "endPeriod": "2025-08-22 18:00:00" } 
+
+$routes->post('deskrentals/check-month-availability', 'DeskRentalsController::checkMonthAvailability');
 
 // RENTAL PLANS ROUTES -----------------------------------
 $routes->get('rental-plans', 'RentalPlansController::index');

@@ -100,7 +100,7 @@ class DeskRentalsController extends BaseController
         $endTime = $this->getEndTimeForShift($shift['shiftName']);
 
         $startPeriod->setTime($startTime['hour'], $startTime['minute'], 0);
-        
+
         $endPeriod = clone $startPeriod;
 
         switch ($category['categoryName']) {
@@ -159,7 +159,7 @@ class DeskRentalsController extends BaseController
         switch ($shiftName) {
             case 'Manhã':
             case 'Integral':
-                return ['hour' => 8, 'minute' => 0]; 
+                return ['hour' => 8, 'minute' => 0];
             case 'Tarde':
                 return ['hour' => 13, 'minute' => 0];
             default:
@@ -171,11 +171,11 @@ class DeskRentalsController extends BaseController
     {
         switch ($shiftName) {
             case 'Manhã':
-                return ['hour' => 12, 'minute' => 0]; 
+                return ['hour' => 12, 'minute' => 0];
             case 'Tarde':
-                return ['hour' => 18, 'minute' => 0]; 
+                return ['hour' => 18, 'minute' => 0];
             case 'Integral':
-                return ['hour' => 18, 'minute' => 0]; 
+                return ['hour' => 18, 'minute' => 0];
             default:
                 return ['hour' => 18, 'minute' => 0];
         }
@@ -214,9 +214,9 @@ class DeskRentalsController extends BaseController
     private function areShiftsCompatible($newShift, $existingShift)
     {
         $compatibleShifts = [
-            'Manhã' => ['Tarde'], 
-            'Tarde' => ['Manhã'], 
-            'Integral' => [] 
+            'Manhã' => ['Tarde'],
+            'Tarde' => ['Manhã'],
+            'Integral' => []
         ];
 
         return in_array($existingShift, $compatibleShifts[$newShift] ?? []);
@@ -259,5 +259,66 @@ class DeskRentalsController extends BaseController
         return $this->response->setJSON([
             "error" => "Aluguel da mesa não encontrado"
         ])->setStatusCode(404);
+    }
+
+    public function checkMonthAvailability()
+    {
+        $data = $this->request->getJSON(true);
+
+        if (!$data || !isset($data['idDesk']) || !isset($data['startDate']) || !isset($data['endDate'])) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setJSON(['error' => 'Dados inválidos']);
+        }
+
+        $deskId = $data['idDesk'];
+        $startDate = new \DateTime($data['startDate']);
+        $endDate = new \DateTime($data['endDate']);
+
+        $rentals = $this->model
+            ->where('idDesk', $deskId)
+            ->where('startPeriod <=', $endDate->format('Y-m-d 23:59:59'))
+            ->where('endPeriod >=', $startDate->format('Y-m-d 00:00:00'))
+            ->findAll();
+
+        $disponibilidade = [];
+
+        foreach ($rentals as $rental) {
+            $rentalStart = new \DateTime($rental['startPeriod']);
+            $rentalEnd = new \DateTime($rental['endPeriod']);
+
+            $plan = (new \App\Models\RentalPlansModel())->find($rental['idPlan']);
+            $shift = (new \App\Models\RentalShiftsModel())->find($plan['idShift']);
+            $shiftName = $shift['shiftName'] ?? 'Integral';
+
+            $currentDate = clone $rentalStart;
+            while ($currentDate <= $rentalEnd) {
+                if ($currentDate >= $startDate && $currentDate <= $endDate) {
+                    $dateString = $currentDate->format('Y-m-d');
+
+                    if (!isset($disponibilidade[$dateString])) {
+                        $disponibilidade[$dateString] = ['manha' => null, 'tarde' => null];
+                    }
+
+                    // Marcar turnos ocupados
+                    if ($shiftName === 'Manhã' || $shiftName === 'Integral') {
+                        $disponibilidade[$dateString]['manha'] = 'parcial';
+                    }
+                    if ($shiftName === 'Tarde' || $shiftName === 'Integral') {
+                        $disponibilidade[$dateString]['tarde'] = 'parcial';
+                    }
+
+                    if ($disponibilidade[$dateString]['manha'] && $disponibilidade[$dateString]['tarde']) {
+                        $disponibilidade[$dateString]['manha'] = 'integral';
+                        $disponibilidade[$dateString]['tarde'] = 'integral';
+                    }
+                }
+                $currentDate->modify('+1 day');
+            }
+        }
+
+        return $this->response->setJSON([
+            'disponibilidade' => $disponibilidade
+        ]);
     }
 }
