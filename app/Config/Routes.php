@@ -77,3 +77,10 @@ $routes->post('deskrentals/check-month-availability', 'DeskRentalsController::ch
 // RENTAL PLANS ROUTES -----------------------------------
 $routes->get('rental-plans', 'RentalPlansController::index');
 // GET http://localhost/projetos/cowork-project-back/public/rental-plans
+
+
+// INVOICES ROUTES
+$routes->get('invoices', 'InvoicesController::getAllInvoices');
+$routes->get('invoices/(:num)', 'InvoicesController::getInvoice/$1');
+$routes->post('invoices/generate/(:num)', 'InvoicesController::generateInvoice/$1');
+$routes->put('invoices/(:num)/pay', 'InvoicesController::markAsPaid/$1');

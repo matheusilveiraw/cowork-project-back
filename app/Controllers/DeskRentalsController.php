@@ -140,6 +140,10 @@ class DeskRentalsController extends BaseController
             $insertedId = $this->model->getInsertID();
             $dadosInserir['idDeskRental'] = $insertedId;
 
+            log_message('info', "Disparando evento deskrental.created para ID: {$insertedId}");
+            
+            \CodeIgniter\Events\Events::trigger('deskrental.created', $insertedId);
+
             return $this->response
                 ->setStatusCode(201)
                 ->setJSON([
@@ -300,7 +304,6 @@ class DeskRentalsController extends BaseController
                         $disponibilidade[$dateString] = ['manha' => null, 'tarde' => null];
                     }
 
-                    // Marcar turnos ocupados
                     if ($shiftName === 'Manhã' || $shiftName === 'Integral') {
                         $disponibilidade[$dateString]['manha'] = 'parcial';
                     }

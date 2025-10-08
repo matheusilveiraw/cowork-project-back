@@ -6,23 +6,6 @@ use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
 use CodeIgniter\HotReloader\HotReloader;
 
-/*
- * --------------------------------------------------------------------
- * Application Events
- * --------------------------------------------------------------------
- * Events allow you to tap into the execution of the program without
- * modifying or extending core files. This file provides a central
- * location to define your events, though they can always be added
- * at run-time, also, if needed.
- *
- * You create code that can execute by subscribing to events with
- * the 'on()' method. This accepts any form of callable, including
- * Closures, that will be executed when the event is triggered.
- *
- * Example:
- *      Events::on('create', [$myInstance, 'myMethod']);
- */
-
 Events::on('pre_system', static function (): void {
     if (ENVIRONMENT !== 'testing') {
         if (ini_get('zlib.output_compression')) {
@@ -36,20 +19,53 @@ Events::on('pre_system', static function (): void {
         ob_start(static fn ($buffer) => $buffer);
     }
 
-    /*
-     * --------------------------------------------------------------------
-     * Debug Toolbar Listeners.
-     * --------------------------------------------------------------------
-     * If you delete, they will no longer be collected.
-     */
     if (CI_DEBUG && ! is_cli()) {
         Events::on('DBQuery', 'CodeIgniter\Debug\Toolbar\Collectors\Database::collect');
         service('toolbar')->respond();
-        // Hot Reload route - for framework use on the hot reloader.
         if (ENVIRONMENT === 'development') {
             service('routes')->get('__hot-reload', static function (): void {
                 (new HotReloader())->run();
             });
         }
     }
+});
+
+Events::on('deskrental.created', function($deskRentalId) {
+    $invoiceModel = new \App\Models\InvoicesModel();
+    $deskRentalModel = new \App\Models\DeskRentalsModel();
+    
+    if ($invoiceModel->invoiceExistsForRental($deskRentalId)) {
+        return;
+    }
+
+    $deskRental = $deskRentalModel->find($deskRentalId);
+    if (!$deskRental) return;
+
+    $customerModel = new \App\Models\CustomersModel();
+    $planModel = new \App\Models\RentalPlansModel();
+    $companyModel = new \App\Models\CompanyDataModel();
+    
+    $customer = $customerModel->find($deskRental['idCustomer']);
+    $plan = $planModel->find($deskRental['idPlan']);
+    $company = $companyModel->first();
+
+    if (!$company) return;
+
+    $year = date('Y');
+    $lastInvoice = $invoiceModel->orderBy('idInvoice', 'DESC')->first();
+    $sequence = $lastInvoice ? ((int) substr($lastInvoice['invoice_number'], -6)) + 1 : 1;
+    $invoiceNumber = $year . str_pad($sequence, 6, '0', STR_PAD_LEFT);
+
+    $invoiceData = [
+        'invoice_number' => $invoiceNumber,
+        'idDeskRental' => $deskRentalId,
+        'issue_date' => date('Y-m-d'),
+        'due_date' => date('Y-m-d', strtotime('+7 days')),
+        'total_amount' => $deskRental['total_price'],
+        'status' => 'pending',
+        'xml_content' => '<?xml version="1.0"?><nfe>NF para aluguel ' . $deskRentalId . '</nfe>',
+        'access_key' => substr(md5(uniqid(rand(), true)), 0, 44)
+    ];
+
+    $invoiceModel->insert($invoiceData);
 });
